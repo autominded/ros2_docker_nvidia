@@ -177,15 +177,44 @@ RUN apt install -y libopenblas-dev libxaw7-dev liborocos-kdl1.3 libpoco-dev libp
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 RUN export LANG=en_US.UTF-8
-RUN apt update && sudo apt install curl gnupg2 lsb-release
-RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+RUN apt update &&  apt install curl gnupg2 lsb-release
+RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 RUN sh -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
-RUN apt update
-RUN apt install ros-dashing-desktop ros-dashing-ros-base
-RUN apt install  python3-argcomplete
-RUN source /opt/ros/dashing/setup.bash
-RUN echo "source /opt/ros/dashing/setup.bash" >> ~/.bashrc
-RUN apt install ros-dashing-rmw-opensplice-cpp # for OpenSplice
-RUN apt install ros-dashing-rmw-connext-cpp # for RTI Connext (requires license agreement)
-RUN apt install ros-dashing-ros1-bridge
-WORKDIR /ros2
+RUN apt update && apt install -y \
+  build-essential \
+  cmake \
+  git \
+  python3-colcon-common-extensions \
+  python3-pip \
+  python-rosdep \
+  python3-vcstool \
+  wget
+# install some pip packages needed for testing
+RUN python3 -m pip install -U \
+  argcomplete \
+  flake8 \
+  flake8-blind-except \
+  flake8-builtins \
+  flake8-class-newline \
+  flake8-comprehensions \
+  flake8-deprecated \
+  flake8-docstrings \
+  flake8-import-order \
+  flake8-quotes \
+  pytest-repeat \
+  pytest-rerunfailures \
+  pytest \
+  pytest-cov \
+  pytest-runner \
+  setuptools
+# install Fast-RTPS dependencies
+RUN apt install --no-install-recommends -y \
+  libasio-dev \
+  libtinyxml2-dev
+# install CycloneDDS dependencies
+RUN apt install --no-install-recommends -y \
+  libcunit1-dev
+RUN mkdir -p ~/ros2_dashing/src
+RUN cd ~/ros2_dashing && wget https://raw.githubusercontent.com/ros2/ros2/dashing/ros2.repos && vcs import src < ros2.repos
+RUN rosdep init && rosdep install --from-paths src --ignore-src --rosdistro dashing -y --skip-keys "console_bridge fastcdr fastrtps libopensplice67 libopensplice69 rti-connext-dds-5.3.1 urdfdom_headers"
+RUN cd ~/ros2_dashing/ &&  apt-get -y install software-properties-common && apt update && apt install -y  clang && export CC=clang && export CXX=clang++ && colcon build --cmake-force-configure && colcon build --symlink-install

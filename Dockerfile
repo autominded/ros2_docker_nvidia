@@ -215,6 +215,6 @@ RUN apt install --no-install-recommends -y \
 RUN apt install --no-install-recommends -y \
   libcunit1-dev
 RUN mkdir -p ~/ros2_dashing/src
-RUN cd ~/ros2_dashing && wget https://raw.githubusercontent.com/ros2/ros2/dashing/ros2.repos && vcs import src < ros2.repos
+#RUN cd ~/ros2_dashing && wget https://raw.githubusercontent.com/ros2/ros2/dashing/ros2.repos && vcs import src < ros2.repos
 #RUN rosdep init && rosdep install --from-paths src --ignore-src --rosdistro dashing -y --skip-keys "console_bridge fastcdr fastrtps libopensplice67 libopensplice69 rti-connext-dds-5.3.1 urdfdom_headers"
-RUN cd ~/ros2_dashing/ &&  apt-get -y install software-properties-common && apt update && apt install -y  clang && export CC=clang && export CXX=clang++ && colcon build --cmake-force-configure && colcon build --symlink-install
+#RUN cd ~/ros2_dashing/ &&  apt-get -y install software-properties-common && apt update && apt install -y  clang && export CC=clang && export CXX=clang++ && colcon build --cmake-force-configure && colcon build --symlink-install
